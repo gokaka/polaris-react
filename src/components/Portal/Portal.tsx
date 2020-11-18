@@ -2,7 +2,7 @@ import React, {useContext, useEffect} from 'react';
 import {createPortal} from 'react-dom';
 
 import {PortalsManagerContext} from '../../utilities/portals';
-import {globalIdGeneratorFactory} from '../../utilities/unique-id';
+import {useUniqueId} from '../../utilities/unique-id';
 import {useIsMountedRef} from '../../utilities/use-is-mounted-ref';
 
 export interface PortalProps {
@@ -10,8 +10,6 @@ export interface PortalProps {
   idPrefix?: string;
   onPortalCreated?(): void;
 }
-
-const getUniqueID = globalIdGeneratorFactory('portal-');
 
 export function Portal({
   children,
@@ -21,8 +19,7 @@ export function Portal({
   const isMounted = useIsMountedRef();
   const portalsContext = useContext(PortalsManagerContext);
 
-  const portalId =
-    idPrefix !== '' ? `${idPrefix}-${getUniqueID()}` : getUniqueID();
+  const portalId = useUniqueId(idPrefix !== '' ? idPrefix : 'Portal');
 
   useEffect(() => {
     if (isMounted) {
@@ -30,10 +27,10 @@ export function Portal({
     }
   }, [onPortalCreated, isMounted]);
 
-  return portalsContext && portalsContext.portalsContainerRef
+  return portalsContext && portalsContext.container
     ? createPortal(
         <div data-portal-id={portalId}>{children}</div>,
-        portalsContext.portalsContainerRef,
+        portalsContext.container,
       )
     : null;
 }
